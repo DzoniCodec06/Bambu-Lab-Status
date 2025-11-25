@@ -1,0 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Varela+Round&display=swap');
+
+:root {
+    /*--status-idle: #ffa60063;
+    --status-online: #00ff0063;
+    --status-offline: #00000017;
+    */
+    --status-color: #00000017;
+}
+
+@keyframes statusAnimation {
+    0% {
+        box-shadow: none;
+    }
+    50% {
+        box-shadow: 0px 0px 5px 5px var(--status-color);
+    }
+    100% {
+        box-shadow: none;
+    }
+}
+
+* {
+    padding: 0px;
+    margin: 0px;
+}
+
+body {
+    font-optical-sizing: auto;
+}
+
+.loading-false {
+    display: none;
+}
+
+.loading {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;   
+    height: 100dvh;
+    width: 100dvw;
+}
+
+.loading p {
+    transform: translateX(20px);
+}
+
+/* HTML: <div class="loader"></div> */
+.loader {
+  --s: 20px;
+  
+  --_d: calc(0.353*var(--s));
+  width: calc(var(--s) + var(--_d));
+  aspect-ratio: 1;
+  display: grid;
+}
+.loader:before,
+.loader:after {
+  content: "";
+  grid-area: 1/1;
+  clip-path: polygon(var(--_d) 0,100% 0,100% calc(100% - var(--_d)),calc(100% - var(--_d)) 100%,0 100%,0 var(--_d));
+  background:
+    conic-gradient(from -90deg at calc(100% - var(--_d)) var(--_d),
+     #fff 135deg,#666 0 270deg,#aaa 0);
+  animation: l6 2s infinite;
+}
+.loader:after {
+  animation-delay:-1s;
+}
+@keyframes l6{
+  0%  {transform:translate(0,0)}
+  25% {transform:translate(30px,0)}
+  50% {transform:translate(30px,30px)}
+  75% {transform:translate(0,30px)}
+  100%{transform:translate(0,0)}
+}
+
+header.false {
+    display: none;
+}
+
+header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 10px;
+}
+
+.info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.status {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: grey;
+    margin-right: 10px;
+    /*box-shadow: 0px 0px 5px 5px #00000017;*/
+    animation: statusAnimation 5s infinite;
+}
+
+.logo {
+    width: 40px;
+    height: 40px;
+}
+
+h1 {
+    font-family: "Orbitron", sans-serif;
+    font-size: 25px;
+    margin-inline: 10px;
+}
+
+p {
+    font-family: "Varela Round", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    font-weight: bold;
+}
+
+.container-false {
+    display: none;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px 10px;
+}
+
+.progress-values {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+progress {
+    -webkit-appearance: none; /* For WebKit/Blink browsers */
+    appearance: none; /* Standard property for future compatibility */
+    width: 100%;
+    height: 25px;
+    border-radius: 20px;
+    background-color: transparent; /* Color of the unfilled bar in some browsers */
+}
+
+progress.fine::-webkit-progress-value {
+    background-color: #4CAF50; /* Color of the filled bar */
+    border-radius: 20px;
+}
+
+progress::-webkit-progress-bar {
+    background-color: #e0e0e0; /* Color of the unfilled track */
+    border-radius: 20px;
+}
+
+progress.failed::-webkit-progress-value {
+    background-color: rgb(224, 43, 43); /* Color of the filled bar */
+    border-radius: 20px;
+}
+
+.not-connected-false {
+    display: none;
+}
+
+.not-connected {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 100dvw;
+    height: 100dvh;
+}
+
+.not-connected h1 {
+    color: red;
+}
+
+.not-connected p {
+    font-weight: lighter;
+    font-size: small;
+}
+

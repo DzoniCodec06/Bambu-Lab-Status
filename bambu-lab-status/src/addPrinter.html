@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Printer</title>
+    <link rel="stylesheet" href="addPrinterStyle.css">
+</head>
+<body>
+    <header>
+        <h1>Add Printer</h1>
+    </header>
+    <div class="container">
+        <form>
+            <div class="item">
+                <label for="ip">Printer IP: </label>
+                <input type="text" name="ip" id="ipAdress" placeholder="192.168.1.4" required>
+            </div>
+            <div class="item">
+                <label for="access-token">Access Token: </label>
+                <input type="text" name="access-token" id="accessToken" placeholder="4180..." required>
+            </div>
+            <div class="item">
+                <label for="serial-num">Serial Number: </label>
+                <input type="text" name="serial-num" id="serialNum" placeholder="030..." required>
+            </div>
+            <div class="btn">
+                <input type="submit" id="submitBtn" value="Connect">
+            </div>
+        </form>
+    </div>
+</body>
+<script src="app.js"></script>
+</html>
