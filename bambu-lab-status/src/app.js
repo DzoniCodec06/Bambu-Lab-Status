@@ -1,41 +1,72 @@
+process.env.NODE_NO_IPV6 = '1';
+
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
+
 const fs = require("fs");
 const ipc = require('electron').ipcRenderer;
 const { BambuClient, isMCPrintMessage } = require("bambu-node");
 
-//ipc.send("close-window");
-
-//let printerProps = {
-//    ip,
-//    accessTok,
-//    serNum
-//}
-
-
-//const printer = new BambuClient({
-    //host: "192.168.1.6",
-    //accessToken: "41806474",
-    //serialNumber: "0309DA521601674"
-    //host: printerProps.ip,
-    //accessToken: printerProps.accessTok,
-    //serialNumber: printerProps.serNum
-//});
+let n = 0;
 
 let fileData;
+//const printer = new BambuClient({host: "", accessToken: "", serialNumber: ""});
+let printer;
 
-const propsFile = fs.readFile("./src/props.txt", "utf8", (err, data) => {
+async function tryToConnect(param) {
+    console.log("Ready to connect");
+
+    printer = new BambuClient({
+        host: fileData[0],
+        accessToken: fileData[1],
+        serialNumber: fileData[2]
+    });
+
+    console.log(`Printer ip: ${printer.clientOptions.host}`);
+    console.log(`Printer Ac Token: ${printer.clientOptions.accessToken}`);
+    console.log(`Printer Ser Num: ${printer.clientOptions.serialNumber}`);   
+    if (param == "true") {
+        console.log("trying to connect");
+        printer.connect().then(() => {
+            console.log("Printer Connected");
+            
+            loadingScreen.classList.replace("loading", "loading-false");
+            headerEl.classList.remove("false");
+            containerEl.classList.replace("container-false", "container");
+            
+            printerStatus.style.backgroundColor = "orange";
+            printerStatus.title = "IDLE";
+            printerName.innerText = `${checkPrinter()} - IDLE`;
+            rootCss.style.setProperty("--status-color", "#ffa60063");
+            
+            progressBar.classList.add("fine");
+        }).catch(err => {
+            if (err) {
+                if (err instanceof AggregateError) {
+                    console.error("AggregateError:", err.errors);
+                } else {
+                    console.error("Connection error:", err);
+                }
+                loadingScreen.classList.replace("loading", "loading-false");
+                headerEl.classList.add("false");
+                containerEl.classList.replace("container", "container-false");
+                notConnecetdScreen.classList.replace("not-connected-false", "not-connected");
+            }
+        });
+    }
+}
+
+const propsFile = fs.readFile("./src/props.txt", "utf8", async (err, data) => {
     let j = 0;
     if (err) {
         console.error(err);
     } else {
-        //console.log(data);
-
         fileData = data.split(/\r\n|\n/);
-
-        console.log(fileData);
     }
+
+    await tryToConnect(fileData[3]); 
 })
 
-const printer = new BambuClient({host: "", accessToken: "", serialNumber: ""});
 
 const submitBtn = document.getElementById("submitBtn");
 const printerIpEl = document.getElementById("ipAdress");
@@ -48,19 +79,11 @@ submitBtn?.addEventListener("click", e => {
     e.preventDefault();
     console.log("Connect to printer");
 
-    //printerProps.ip = printerIpEl?.value;
-    //printerProps.accessTok = accessTokenEl.value;
-    //printerProps.serNum = serialNumEl.value;
-
-    //printer.clientOptions.host = printerIpEl?.value;
-    //printer.clientOptions.accessToken = accessTokenEl?.value;
-    //printer.clientOptions.serialNumber = serialNumEl?.value;
-
     if (printerIpEl.value == "" || accessTokenEl.value == "" || serialNumEl.value == "") {
         return;
     }
 
-    let dataForFile = `${printerIpEl.value}\r\n${accessTokenEl.value}\r\n${serialNumEl.value}`;
+    let dataForFile = `${printerIpEl.value}\r\n${accessTokenEl.value}\r\n${serialNumEl.value}\r\ntrue`;
 
     const fileProps = fs.writeFile("./src/props.txt", dataForFile, (err) => {
         if (err) console.error(err);
@@ -97,28 +120,19 @@ const containerEl = document.getElementById("container");
 const notConnecetdScreen = document.getElementById("notConnectedScreen");
 
 function checkPrinter() {
-    if (printer.clientOptions.serialNumber.startsWith("030")) {
+    if (printer?.clientOptions.serialNumber.startsWith("030")) {
         //printerName.innerText = "A1 Mini";    
         return "A1 Mini";
-    } else if (printer.clientOptions.serialNumber.startsWith("00M")) {
+    } else if (printer?.clientOptions.serialNumber.startsWith("00M")) {
         //printerName.innerText = "X1C";
         return "X1C";
-    } else if (printer.clientOptions.serialNumber.startsWith("093")) {
+    } else if (printer?.clientOptions.serialNumber.startsWith("093")) {
         //printerName.innerText = "H2S";
         return "H2S";
     } else return "Unknown";
 }
 
-
-//const rootVars = getComputedStyle(rootCss);  *** FOR READ ONLY 
-
-//prgNumber.innerText = "50 %";
-//timeEl.innerText = "15 min";
-
-//progressBar.value = 50;
-
 window.addEventListener("keypress", async (e) => {
-    //console.log(e);
     if (e.key == "\x11") {
         console.log("quit window");
 
@@ -158,7 +172,7 @@ if (globalStatus == null) {
     printerName.innerText += `${checkPrinter()} - ONLINE`;
 }
 
-printer.on("printer:statusUpdate", (oldStatus, newStatus) => {
+printer?.on("printer:statusUpdate", (oldStatus, newStatus) => {
     if (newStatus == "RUNNING") {
         console.log(newStatus);
         globalStatus = newStatus;
@@ -194,7 +208,7 @@ printer.on("printer:statusUpdate", (oldStatus, newStatus) => {
     }
 });
 
-printer.on("printer:dataUpdate", (data, updatePackage) => {
+printer?.on("printer:dataUpdate", (data, updatePackage) => {
     if (globalStatus == "RUNNING") {
         printerStatus.style.backgroundColor = "#4CAF50";
         printerStatus.title = "ACTIVE";
@@ -212,39 +226,3 @@ printer.on("printer:dataUpdate", (data, updatePackage) => {
     } else return;
 
 });
-
-if (readyToConnect == true) {
-    console.log(`Printer ip: ${printer.clientOptions.host}`);
-    console.log(`Printer Ac Token: ${printer.clientOptions.accessToken}`);
-    console.log(`Printer Ser Num: ${printer.clientOptions.serialNumber}`);
-
-    printer.clientOptions.host = fileData[0];
-    printer.clientOptions.accessToken = fileData[1];
-    printer.clientOptions.serialNumber = fileData[2];
-
-    printer.connect().then(() => {
-        console.log("Printer Connected");
-        
-        loadingScreen.classList.replace("loading", "loading-false");
-        headerEl.classList.remove("false");
-        containerEl.classList.replace("container-false", "container");
-    
-        printerStatus.style.backgroundColor = "orange";
-        printerStatus.title = "IDLE";
-        printerName.innerText = `${checkPrinter()} - IDLE`;
-        rootCss.style.setProperty("--status-color", "#ffa60063");
-    
-        progressBar.classList.add("fine");
-    }).catch(err => {
-        if (err) {
-            console.error(err);
-            loadingScreen.classList.replace("loading", "loading-false");
-            headerEl.classList.add("false");
-            containerEl.classList.replace("container", "container-false");
-            notConnecetdScreen.classList.replace("not-connected-false", "not-connected");
-        }
-    });
-}
-
-
-
